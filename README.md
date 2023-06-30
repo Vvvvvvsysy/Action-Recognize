@@ -56,7 +56,7 @@ shaking hands:  1.944649739016313e-07
 输出以上结果，证明环境安装成功。
 
 ## 准备训练数据(以ucf101为例)
-动作识别的数据集类别和介绍整理到：https://github.com/Vvvvvvsysy/action-recognize-dataset-conclusion
+动作识别的数据集类别和介绍整理到：https://github.com/Vvvvvvsysy/Action-Recognize/tree/main/dataset
 
 ```c
 // 进入mmaction2/tools/data/ucf101目录
@@ -253,6 +253,14 @@ bash mmaction2_library/tools/dist_test.sh ucf101/slowfast_100epoch/slowfast_r50_
 // 输出模型的参数量和在指定输入数据下的计算量
 python tools/analysis_tools/get_flops.py {config path}
 ```
+## some baselines
+| model        | frame sampleing strategy | resoution      | backbone         | pretrain               | epoch  | val protocol                       | top1-acc-val | top5-acc-val | test protocol                | top1-acc-test | top5-acc-test | parameters | FLOPs             |
+| ------------ | ------------------------ | -------------- | ---------------- | ---------------------- | ------ | ---------------------------------- | ------------ | ------------ | ---------------------------- | ------------- | ------------- | ---------- | ----------------- |
+| I3D          | 32×2×1                   | 224×224        | Res50-3D         | ImageNet + Kinetics400 | 84/100 | 1 clips x 1 center crop × 32frames | 91.01        | 98.30        | 10 clips × 3 crop × 32frames | 91.91         | 98.78         | 27.431M    | 33.271G(32frames) |
+| SlowFast     | 32×2×1                   | 224×224        | Res50-3D         | Kinetics400            | 20/100 | 1 clips x 1 center crop × 32frames | 94.97        | 99.55        | 10 clips × 3 crop × 32frames | 96.08         | 99.52         | 33.79M     | 27.817G(32frames) |
+| TimeSformer  | 8×32×1                   | 224×224        | ViT-B/16         | ImageNet-21K           | 19/30  | 1 clip × 1 center crop × 8frames   | 95.37        | 99.23        | 1 clip × 3 crop × 8frames    | 94.98         | 99.41         | 123.904M   | 200.7.4G(8frames) |
+| Uniformer-v2 | uniform sampling-8frames | short side 320 | UniformerV2-B/16 | clip                   | 28/30  | 1 clip × 1 center crop × 8frames   | 97.36        | 99.78        | 4 clips × 3 crop × 8frames   | 97.51         | 99.78         | 116.736M   | 151.552G(8frames) |
+
 ## some problems
 ### 1、模型验证和测试用同样数据却得到不同的指标？
 这个是因为模型对验证集和测试集的前处理pipeline不一样。一般在测试集处理上会抽取更多clips，对视频帧的采样更密集，想对来说会更有优势一点。
